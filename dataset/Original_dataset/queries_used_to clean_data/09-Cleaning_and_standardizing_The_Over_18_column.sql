@@ -1,6 +1,5 @@
-
 /* Cleaning and standardizing 
-the MaritalStatus column
+the Over 18 column
 */
 SELECT 
 DISTINCT hr_attrition_messy_10000.Over18
