@@ -32,6 +32,8 @@ To successfully clean, validate, and prepare this dataset for downstream reporti
 5. **Enforcing Global Data Schema Controls:** How can we ensure categorical constants across legal filters (such as age verifications and monthly data entries) conform to corporate database integrity standards?
 
 
+##  Cleaning and Standardizing Data for  better readability
+
 
 
 
