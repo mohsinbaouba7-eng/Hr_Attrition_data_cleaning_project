@@ -35,6 +35,8 @@ To successfully clean, validate, and prepare this dataset for downstream reporti
 ##  Cleaning and Standardizing Data for  better readability
 
 1. 
+
+
 ```sql
 /* FULL CLEANING DATA TO GET IT READY FOR ANALYSIS
 
@@ -46,29 +48,14 @@ To successfully clean, validate, and prepare this dataset for downstream reporti
 -- 1- Creeate DATABASE 
 CREATE database Hr_Attrition;
 
+--2- Create the table via uploading the DATA 
 
--- III -  Attrition coloumn 
-
--- A- ADD NEW COLUMN "ATTRITON_Y_N"
-
-ALTER TABLE hr_attrition_messy_10000
-ADD COLUMN  Attrition_Y_N INT;
-
-SELECT *
-FROM hr_attrition_messy_10000;
-
--- B- UPDATING THE COLUMN AND TURN TO A NUMERICAL VALUE 'YES = 1 ' , 'NO = 0 '
-
-SET SQL_SAFE_UPDATES = 0;
-
-UPDATE hr_attrition_messy_10000
-SET Attrition_Y_N = CASE
-	WHEN hr_attrition_messy_10000.Attrition = 'YES' THEN 1
-    WHEN hr_attrition_messy_10000.Attrition = 'No' THEN 0
-    END;
 ```
 
-2. 
+2. **Data Standardization: Resolving Categorical Anomalies in Gender**
+
+This query cleanses and standardizes the highly inconsistent ⁠Gender⁠ column within the ⁠hr_attrition_messy_10000⁠ table. By utilizing defensive ⁠CASE⁠ logic combined with ⁠TRIM()⁠ and ⁠UPPER()⁠ functions, it unifies fragmented entry formats **(such as 'm', 'M', 'male', 'Male')** into explicit Male or Female categories. Additionally, it actively catches and groups corrupted or missing entries—including empty strings, **⁠NULL⁠ values, ⁠'NA'⁠, and ⁠'?'**⁠—into a standardized 'Missing' flag.
+
 ```sql
 /* Data Standardization: Standardizing 
 Categorical Anomalies in the Gender Feature*/
@@ -97,8 +84,7 @@ FROM
 
 ```
 
-
-3. 
+3. This query addresses data quality issues within the ⁠Department⁠ column by standardizing inconsistent naming conventions, abbreviations, and missing or corrupted values. The dataset contained multiple variations for identical departments (e.g., shorthand abbreviations or varying case formats), as well as placeholder strings for missing values.
 ```sql
 
 /*Data Standardization: 
@@ -140,7 +126,12 @@ SET  hr_attrition_messy_10000.Department =
 ```
 
 
-4. 
+4. This query resolves data formatting inconsistencies within the ⁠EmployeeName⁠ feature. In the raw dataset, employee names were stored using chaotic casing formats (e.g., completely uppercase names like **⁠'JOHN SMITH'⁠ or entirely lowercase entries)**, which negatively impacts readability and reporting aesthetics.
+Since SQL dialects like MySQL or standard PostgreSQL do not always feature a native, built-in ⁠INITCAP()⁠ function for proper title casing, this script dynamically reconstructs the strings using a combination of foundational string manipulation functions **(⁠CONCAT()⁠, ⁠UPPER()⁠, ⁠LOWER()⁠, ⁠SUBSTRING()⁠, and ⁠LOCATE()⁠)**.
+The logic parses and reformats the full name by identifying the space character separating the first and last name:
+ First Name Formatting: Isolates the first character using**⁠SUBSTRING(..., 1, 1)**⁠ and converts it to uppercase via **⁠UPPER()**⁠, while extracting the remaining letters up to the space character and converting them to lowercase using ⁠LOWER()⁠.
+ Space Injection: Appends a clean single space (⁠' '⁠) between the parsed name components.
+ Last Name Formatting: Uses **⁠LOCATE(' ', employeeName)**⁠ to dynamically find the starting position of the surname, isolates its first character to uppercase it, and maps the rest of the string to lowercase
 ```sql
 
 /* Converts messy, full UPPERCASE employee names into proper 
@@ -185,7 +176,11 @@ trim(EmployeeName);
 
 
 
-5. 
+5. This query focuses on standardizing the key target metric, ⁠Attrition⁠, by resolving text variations, casing inconsistencies, and poorly handled missing data. Because attrition flags are critical for downstream reporting and predictive modeling, ensuring binary clarity **('Yes' vs. 'No')** along with explicit handling of invalid data is essential.
+Using a ⁠CASE⁠ statement coupled with **⁠trim()⁠ and ⁠UPPER()**⁠ functions to strip trailing spaces and eliminate case sensitivity, the script groups messy values into three precise categories:
+ No: Reconciles negative variations such as ⁠'N'⁠ and ⁠'NO'⁠ into a clean, uniform ⁠'No'⁠ flag.
+ Yes: Reconciles positive variations such as ⁠'Y'⁠ and ⁠'YES'⁠ into a clean, uniform ⁠'Yes'⁠ flag.
+ Missing: Captures corrupted strings, broken entries, or placeholders **(such as ⁠'NA '⁠, ⁠'N/A'⁠, ⁠'UNKNOWN'⁠)**, as well as special characters **(⁠'?'⁠, ⁠'-'⁠, or empty strings ⁠''⁠)**, and safely maps them to a uniform ⁠'Missing'⁠ label
 
 ```sql
 
