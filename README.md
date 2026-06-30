@@ -131,7 +131,7 @@ Since SQL dialects like MySQL or standard PostgreSQL do not always feature a nat
 The logic parses and reformats the full name by identifying the space character separating the first and last name:
  First Name Formatting: Isolates the first character using**⁠SUBSTRING(..., 1, 1)**⁠ and converts it to uppercase via **⁠UPPER()**⁠, while extracting the remaining letters up to the space character and converting them to lowercase using ⁠LOWER()⁠.
  Space Injection: Appends a clean single space (⁠' '⁠) between the parsed name components.
- Last Name Formatting: Uses **⁠LOCATE(' ', employeeName)**⁠ to dynamically find the starting position of the surname, isolates its first character to uppercase it, and maps the rest of the string to lowercase
+ Last Name Formatting: Uses **⁠LOCATE(' ', employeeName)**⁠ to dynamically find the starting position of the surname, isolates its first character to uppercase it, and maps the rest of the string to lowercase.
 ```sql
 
 /* Converts messy, full UPPERCASE employee names into proper 
@@ -173,15 +173,11 @@ SET hr_attrition_messy_10000.EmployeeName =
 trim(EmployeeName);
 
 ```
-
-
-
 5. This query focuses on standardizing the key target metric, ⁠Attrition⁠, by resolving text variations, casing inconsistencies, and poorly handled missing data. Because attrition flags are critical for downstream reporting and predictive modeling, ensuring binary clarity **('Yes' vs. 'No')** along with explicit handling of invalid data is essential.
 Using a ⁠CASE⁠ statement coupled with **⁠trim()⁠ and ⁠UPPER()**⁠ functions to strip trailing spaces and eliminate case sensitivity, the script groups messy values into three precise categories:
  No: Reconciles negative variations such as ⁠'N'⁠ and ⁠'NO'⁠ into a clean, uniform ⁠'No'⁠ flag.
  Yes: Reconciles positive variations such as ⁠'Y'⁠ and ⁠'YES'⁠ into a clean, uniform ⁠'Yes'⁠ flag.
- Missing: Captures corrupted strings, broken entries, or placeholders **(such as ⁠'NA '⁠, ⁠'N/A'⁠, ⁠'UNKNOWN'⁠)**, as well as special characters **(⁠'?'⁠, ⁠'-'⁠, or empty strings ⁠''⁠)**, and safely maps them to a uniform ⁠'Missing'⁠ label
-
+ Missing: Captures corrupted strings, broken entries, or placeholders **(such as ⁠'NA '⁠, ⁠'N/A'⁠, ⁠'UNKNOWN'⁠)**, as well as special characters **(⁠'?'⁠, ⁠'-'⁠, or empty strings ⁠''⁠)**, and safely maps them to a uniform ⁠'Missing'⁠ label.
 ```sql
 
 /* Cleaning and standardizing the Attrtion column
@@ -207,7 +203,12 @@ FROM
 
 ```
 
-6. 
+6. This query addresses categorical inconsistencies and structural noise within the ⁠BusinessTravel⁠ column. Business travel frequencies are highly valuable categorical metrics for analyzing employee burnout and attrition trends; therefore, removing abbreviations and correcting case anomalies is essential for clear segmentation.
+The script runs a comprehensive **⁠CASE⁠ statement** utilizing **⁠TRIM()⁠ and ⁠UPPER()** functions to strip accidental spaces, override case variations, and collapse multiple text variants into structured, professional labels:
+ Travel Rarely: Groups shorthand identifiers and inconsistent casings like **⁠'T'⁠, ⁠'TRAVEL_RARELY'⁠, and ⁠'TRAVEL RARELY'**⁠ into a standard ⁠'Travel Rarely'⁠ category.
+ Travel Frequently: Consolodates variants like **⁠'T'⁠, ⁠'TRAVEL_FREQUNTLY'⁠, and ⁠'TRAVEL FREQUENTLY'⁠ into a uniform ⁠'Travel Frequently'⁠ label.**
+ No Travel: Cleans up negative markers such as ** ⁠'N'⁠, ⁠'NON-TRAVEL'⁠, and ⁠'NO TRAVEL'⁠** to establish a definitive ⁠'No Travel'⁠ state.
+ Missing: Standardizes structural gaps—including literal database ⁠NULL⁠ values, missing text placeholders **(⁠'NA'⁠, ⁠'N/A'⁠, ⁠'UNKNOWN'⁠)**, and corrupted characters **(⁠'?'⁠, ⁠''⁠, ⁠'-'⁠)**—by funneling them into a single ⁠'Missing'⁠ group.
 ```sql
 /* Cleaning and standardizing the
  BusinessTravel column
